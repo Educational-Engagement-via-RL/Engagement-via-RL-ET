@@ -3,7 +3,12 @@
 > Note: This document began as a proposal and a process log for the project and will be updated iteratively as the project progresses. The final version will serve as the formal README for the repository.
 
 > **[2023-10-18]** Repo Initiation\
-> **[Upcoming]** Demo UI
+> **[Upcoming]**
+> 1. RDB for Learning Material
+> 2. Integration with ET
+> 3. CNN for Similarity
+> 4. UI
+> 5. RL Model
 
 # Proposal
 
