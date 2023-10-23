@@ -153,7 +153,7 @@ class Img2Vec:
 
     def embed_image(self, img):
         # load and preprocess image
-        img = Image.open(img)
+        img = Image.open(img).convert("RBG")
         img_trans = self.transform(img)
 
         # store computational graph on GPU if available
