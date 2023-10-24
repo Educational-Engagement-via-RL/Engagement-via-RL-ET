@@ -1,0 +1,17 @@
+# General project settings
+project_name: ENGAGEMENT-VIA-RL-ET
+
+# Engagement from Eye Tracking settings
+engagement_from_ET:
+  epochs: ...
+  learning_rate: ...
+
+# RL Model settings
+rl_model:
+  learning_rate: ...
+  discount_factor: ...
+  epsilon: ...
+
+# Student 
+student:
+  student_id: ..
