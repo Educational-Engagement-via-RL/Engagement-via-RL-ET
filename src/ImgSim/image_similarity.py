@@ -4,6 +4,8 @@ import math
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+from sklearn.metrics.pairwise import cosine_similarity
 import torch.nn as nn
 import torchvision.models as models
 import torchvision.transforms as transforms
@@ -153,7 +155,7 @@ class Img2Vec:
 
     def embed_image(self, img):
         # load and preprocess image
-        img = Image.open(img).convert("RBG")
+        img = Image.open(img).convert("RGB")
         img_trans = self.transform(img)
 
         # store computational graph on GPU if available
@@ -207,6 +209,31 @@ class Img2Vec:
         self.output_images(sim_dict, target_file)
 
         return sim_dict
+    
+    def similar_images_df(self, df, n=None):
+        """
+        Function for comparing target image to embedded image dataset
+
+        Parameters:
+        -----------
+        df: dataFrame containing embeddings of all pictures, self.dataset df version
+        target_file: str specifying the path of target image to compare
+            with the saved feature embedding dataset
+        n: int specifying the top n most similar images to return
+        """
+        # Embeddings are stored as PyTorch tensors, convert them to numpy arrays
+        df_embeddings = pd.DataFrame(list(self.dataset.items()), columns=['Name', 'Embedding'])
+        df_embeddings['Embedding'] = df_embeddings['Embedding'].apply(lambda x: x.numpy())
+
+        # Compute the cosine similarity from sklearn
+        similarity_matrix = cosine_similarity(np.stack(df_embeddings['Embedding'].values))
+
+        # Convert this matrix to a DataFrame
+        df_similarity = pd.DataFrame(similarity_matrix, 
+                                    index=df_embeddings['Name'], 
+                                    columns=df_embeddings['Name'])
+
+        return df_similarity
 
     def output_images(self, similar, target):
         self.display_img(target, "original")
