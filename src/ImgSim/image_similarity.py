@@ -153,6 +153,38 @@ class Img2Vec:
 
         return source_list
 
+
+    def process_individual_image(self, images_folder, output_folder):
+        """
+        Processes all images in a given folder and saves their embeddings.
+
+        Parameters:
+        -----------
+        images_folder: str
+            The folder containing images to process.
+        output_folder: str
+            The folder where the embeddings will be saved.
+        """
+        # Process each image in the folder
+        for image_file in os.listdir(images_folder):
+            image_path = os.path.join(images_folder, image_file)
+            if os.path.isfile(image_path):
+                try:
+                    # Get the embedding for the individual image
+                    embedding = self.embed_image(image_path)
+
+                    # Create a unique filename for the embedding
+                    filename = os.path.splitext(os.path.basename(image_path))[0] + '_embedding.pt'
+
+                    # Save the embedding to the specified folder
+                    embedding_path = os.path.join(output_folder, filename)
+                    torch.save(embedding, embedding_path)
+
+                    print(f"Processed and saved embedding for {image_file}")
+                except Exception as e:
+                    print(f"Error processing {image_file}: {e}")
+
+
     def embed_image(self, img):
         # load and preprocess image
         img = Image.open(img).convert("RGB")
@@ -164,7 +196,7 @@ class Img2Vec:
 
         img_trans = img_trans.unsqueeze(0)
 
-        return self.embed(img_trans)
+        return img_trans
 
     def embed_dataset(self, source):
         # convert source to appropriate format
