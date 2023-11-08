@@ -241,30 +241,64 @@ class Img2Vec:
         self.output_images(sim_dict, target_file)
 
         return sim_dict
+
     
-    def similar_images_df(self, df, n=None):
+    def similar_images_df(self, target_file, embeddings_dir, output_csv_dir=None, n=None):
         """
-        Function for comparing target image to embedded image dataset
+        Modified function for comparing target image to individually stored
+        embeddings dataset.
 
         Parameters:
         -----------
-        df: dataFrame containing embeddings of all pictures, self.dataset df version
-        target_file: str specifying the path of target image to compare
-            with the saved feature embedding dataset
-        n: int specifying the top n most similar images to return
+        target_file: str
+            The path of the target image to compare with the saved feature embedding dataset.
+        embeddings_dir: str
+            The directory where the embeddings are stored.
+        output_csv: str, optional
+            Path to save the resulting DataFrame as CSV.
+        n: int, optional
+            The top n most similar images to return. If None, returns all.
         """
-        # Embeddings are stored as PyTorch tensors, convert them to numpy arrays
-        df_embeddings = pd.DataFrame(list(self.dataset.items()), columns=['Name', 'Embedding'])
-        df_embeddings['Embedding'] = df_embeddings['Embedding'].apply(lambda x: x.numpy())
 
-        # Compute the cosine similarity from sklearn
-        similarity_matrix = cosine_similarity(np.stack(df_embeddings['Embedding'].values))
+        # Embed the target image
+        target_path = os.path.join(embeddings_dir, target_file)
+        target_vector = torch.load(target_path)
 
-        # Convert this matrix to a DataFrame
-        df_similarity = pd.DataFrame(similarity_matrix, 
-                                    index=df_embeddings['Name'], 
-                                    columns=df_embeddings['Name'])
+        # Initialize the cosine similarity function
+        cosine = nn.CosineSimilarity(dim=1)
 
+        # Load embeddings and compute similarity
+        sim_dict = {}
+        for embedding_file in os.listdir(embeddings_dir):
+            if embedding_file == target_file:
+                continue
+            else:
+                embedding_path = os.path.join(embeddings_dir, embedding_file)
+                image_embedding = torch.load(embedding_path)
+                image_name = os.path.splitext(embedding_file)[0].replace('_embedding', '') #os.path.splitext split the file path into (root, extion) pairt
+                sim = cosine(image_embedding, target_vector)[0].item() #.item() converts single-item tensor to the value itself
+                sim_dict[image_name] = sim
+
+        # Sort based on decreasing similarity
+        sorted_sim_dict = dict(sorted(sim_dict.items(), key=lambda item: item[1], reverse=True))
+
+        # Cut to defined top n similar images if n is specified
+        if n is not None:
+            sorted_sim_dict = dict(list(sorted_sim_dict.items())[:int(n)])
+
+        # Convert the similarity dictionary to a DataFrame
+        df_similarity = pd.DataFrame.from_dict(sorted_sim_dict, orient='index', columns=['Similarity'])
+
+        # Set the column and index names based on the image filenames
+        df_similarity.index.name = 'Image'
+        df_similarity.reset_index(inplace=True)
+
+        # Save the DataFrame to a CSV if output path is provided
+        if output_csv_dir:
+            output_path = os.path.join(output_csv_dir, image_name + ".csv")
+            df_similarity.to_csv(output_path, index=False)
+
+        # Optionally, you could return the DataFrame if needed
         return df_similarity
 
     def output_images(self, similar, target):
