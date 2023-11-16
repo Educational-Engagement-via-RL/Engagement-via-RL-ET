@@ -120,3 +120,6 @@ def run():
         current_flag = next_flag
 
     epsilon = max(epsilon*0.999, min_explore)
+
+if __name__ == "__main__":
+    run()
