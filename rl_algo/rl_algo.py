@@ -45,81 +45,86 @@ def decide_flag(current_flag, action):
     sim_pattern = os.path.join(sim_directory, current_flag, '.csv')
     df_sim = pd.read_csv(sim_pattern)
 
-    if similarity == 'high':
-        df_sim = df_sim[df_sim['Similarity'] >= high_threshold] 
-    elif similarity == 'median':
-        df_sim = df_sim[(df_sim['Similarity'] >= low_threshold) & (df_sim['Similarity']) < high_threshold]
-    else:
-        df_sim = df_sim[df_sim['Similarity'] < low_threshold]
-
     similar_flags = set(df_sim['Image'].head(5))
 
     # sort out (un)familiar flags
     df_fam = pd.read_csv(fam_path)
 
     df_fam = df_fam[df_fam['Familiarity'] == familiarity]
-    familiar_flags = set(df_fam['Image'].head(5))
+    familiar_flags = set(df_fam['Image'])
 
-    flags_chosen = similar_flags.intersection(familiar_flags)
-    if flags_chosen:
-        return random.choice(flags_chosen)
-    else: # to-do: what shall we do when empty set
-        None
+    if similarity == 'high':
+        flag_chosen = df_sim[df_sim['Image'].isin(familiar_flags)].sort_values(by=['Similarity']).iloc[0]['Image']
+    elif similarity == 'median':
+        df_sim_filter1 = df_sim[df_sim['Image'].isin(familiar_flags)].sort_values(by=['Similarity'])
+        flag_chosen = df_sim_filter1.iloc[int(len(df_sim_filter1)/2)]['Image']
+    else:
+        flag_chosen = df_sim[df_sim['Image'].isin(familiar_flags)].sort_values(by=['Similarity']).iloc[-1]['Image']
+
+    return flag_chosen
 
 def run():
     # Define the labels for the dimensions
-    # dimensions = ['Engagement', 'Familiarity', 'Similarity']
+    # dimensions = ['Engagement', 'Familiarity', 'Similarity', 'Boring level']
     # Possible values for each dimension
     values = ['high', 'median', 'low']
-    # Generate all possible combinations for the 3 dimensions
+    integer_range = range(0, 21)
+    # Generate all possible combinations for the 4 dimensions
     state_space = list(itertools.product(values, repeat=3))
-    # [(engagement, familiarity, similarity), ...]
+    state_space = [combination + (i,) for combination in state_space for i in integer_range] 
+    # [(engagement, familiarity, similarity, pages), ...]
 
     # a_dimensions = ['Familiarity', 'Similarity']
     a_values = ['high', 'median', 'low']
     action_space = list(itertools.product(a_values, repeat=2))
     # [(familiarity, similarity), ...]
+    reward_sum = 0
 
     rs = random.randint(0,len(state_space))
     ra = random.randint(0,len(action_space))
-    num_episodes=1000
+    num_episodes=4 # number of test users
     gamma=0.95
     learnRate=0.8
-    epsilon = 0.8
-    min_explore = 0.01
+    epsilon=0.8
+    min_explore=0.01
 
     # initialization
-    Q=np.zeros([state_space[rs], action_space[ra]]) #Q(s,a). The Q-values from this array will be used to evaluate your policy.
+    Q=np.array([state_space[rs], action_space[ra]]) #Q(s,a). The Q-values from this array will be used to evaluate your policy.
     flags = create_flag_list()
-    current_flag = random.choice(flags)
-    s = (engagement(current_flag), familiar(current_flag), random.choice(state_space)[2]) # call engagement function
 
-    #execute in episodes
+    #each user session is one episode
     for i in range(num_episodes):
-
-        #reset the environment at the beginning of an episode       
+        #reset the environment at the beginning of an episode
+        current_flag = random.choice(flags)
+        pages = 0
+        s = (engagement(current_flag), familiar(current_flag), random.choice(state_space)[2], pages)
         done = False #not done
 
-        if np.random.rand() < epsilon:
-            a = random.choice(action_space)
-        else:
-            a = np.argmax(Q[s, :])
-        print(a) # e.g. ('high', 'low')
-        next_flag = decide_flag(a)
-        r = engagement_level(next_flag)
-        s1 = (engagement(next_flag), familiar(next_flag), similar(current_flag, next_flag))
-        # done = ?
-        #     
-        Q[s, a] = (1 - learnRate) * Q[s, a] + learnRate * (r + gamma * np.max(Q[s1, :]))
+        while not done:
+            if np.random.rand() < epsilon:
+                a = random.choice(action_space)
+            else:
+                a = np.argmax(Q[s, :])
+            print(a) # e.g. ('high', 'low')
+            next_flag = decide_flag(a)
+            r = engagement_level(next_flag)
+            reward_sum += r
+            pages += 1
+            s1 = (engagement(next_flag), familiar(next_flag), similar(current_flag, next_flag), pages)
+        
+            Q[s, a] = (1 - learnRate) * Q[s, a] + learnRate * (r + gamma * np.max(Q[s1, :]))
 
-        #break if done, reached terminal state
-        if done:
-            break
+            #break if done, reached terminal state
+            if pages == 20:
+                done = True
+            if done:
+                break
 
-        s=s1
-        current_flag = next_flag
+            s=s1
+            current_flag = next_flag
 
-    epsilon = max(epsilon*0.999, min_explore)
+            epsilon = max(epsilon*0.999, min_explore)
+    return reward_sum
 
 if __name__ == "__main__":
     run()
