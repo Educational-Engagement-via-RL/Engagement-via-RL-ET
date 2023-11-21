@@ -8,6 +8,8 @@ import glob
 
 high_threshold = 0.5
 low_threshold = -0.5
+egm_high = 0.65
+egm_low = 0.35
 sim_directory = os.path.join(os.path.dirname(__file__), '..', 'data/SimilarityCsv') # __file__ represents the current file path
 fam_path = os.path.join(os.path.dirname(__file__), '..', 'data/familiarity.csv')
 
@@ -63,6 +65,16 @@ def decide_flag(current_flag, action):
 
     return flag_chosen
 
+def decide_engagement_level(engagement):
+    if engagement > egm_high:
+        engagement_level = 'high'
+    elif engagement > egm_low and engagement <= egm_high:
+        engagement_level = 'median'
+    else:
+        engagement_level = 'low'
+
+    return engagement_level
+
 def run():
     # Define the labels for the dimensions
     # dimensions = ['Engagement', 'Familiarity', 'Similarity', 'Boring level']
@@ -97,7 +109,8 @@ def run():
         #reset the environment at the beginning of an episode
         current_flag = random.choice(flags)
         pages = 0
-        s = (engagement(current_flag), familiar(current_flag), random.choice(state_space)[2], pages)
+        engagement = calculate_engagement(current_flag)
+        s = (decide_engagement_level(engagement), familiar(current_flag), random.choice(state_space)[2], pages)
         done = False #not done
 
         while not done:
@@ -107,10 +120,10 @@ def run():
                 a = np.argmax(Q[s, :])
             print(a) # e.g. ('high', 'low')
             next_flag = decide_flag(a)
-            r = engagement_level(next_flag)
+            r = calculate_engagement(next_flag)
             reward_sum += r
             pages += 1
-            s1 = (engagement(next_flag), familiar(next_flag), similar(current_flag, next_flag), pages)
+            s1 = (decide_engagement_level(r), familiar(next_flag), similar(current_flag, next_flag), pages)
         
             Q[s, a] = (1 - learnRate) * Q[s, a] + learnRate * (r + gamma * np.max(Q[s1, :]))
 
