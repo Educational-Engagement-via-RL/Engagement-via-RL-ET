@@ -1,4 +1,3 @@
-#initialize episodic structure
 import itertools
 import pandas as pd
 import numpy as np
@@ -6,31 +5,66 @@ import random
 import os
 import glob
 
-high_threshold = 0.5
-low_threshold = -0.5
+# similarity with scale -1 to 1
+sim_high = 0.3
+sim_low = -0.7
+# engagement with scale 0 to 1
 egm_high = 0.65
 egm_low = 0.35
 sim_directory = os.path.join(os.path.dirname(__file__), '..', 'data/SimilarityCsv') # __file__ represents the current file path
 fam_path = os.path.join(os.path.dirname(__file__), '..', 'data/familiarity.csv')
 
+def initialize():
+    ''' Create state space with dimensions = ['Engagement', 'Familiarity', 'Similarity', 'Boring level']
+        and action space with a_dimensions = ['Familiarity', 'Similarity']
+        integer index
+    '''
+    values = ['high', 'median', 'low']
+    integer_range = range(0, 21) #possible page numbers
+    # Generate all possible combinations for the 4 dimensions
+    state_space = list(itertools.product(values, repeat=3))
+    state_space = [combination + (i,) for combination in state_space for i in integer_range] 
+    a_values = ['high', 'median', 'low']
+    action_space = list(itertools.product(a_values, repeat=2))
+    # Create dictionaries to map between index and state space or action space
+    state_to_index = {state: index for index, state in enumerate(state_space)}
+    action_to_index = {action: index for index, action in enumerate(action_space)}
+    index_to_state = {index: state for index, state in enumerate(state_space)}
+    index_to_action = {index: action for index, action in enumerate(action_space)}
+
+    return state_space, action_space, state_to_index, action_to_index, index_to_state, index_to_action
+
 def familiar(flag):
+    '''Read familiarity table and return familiarity level
+    input param, flag: string, national flag file name
+    return, familiarity level: string
+    '''
     df_fam =pd.read_csv(fam_path)
     return df_fam.loc[flag, 'Familiarity']
 
 def similar(current_flag, next_flag):
+    '''Read similarity table and return similarity level
+    input param
+        current_flag: string, current national flag file name
+        next_flag: string, next national flag file name\
+    return, similarity level: string, categorical created by if-else statement
+    '''
     csv_path = os.path.join(sim_directory, current_flag, '.csv')
     df_sim = pd.read_csv(csv_path)
     sim = df_sim.loc[next_flag, 'Similarity']
 
-    if sim >= high_threshold:
+    if sim >= sim_high:
         return 'high'
-    elif sim >= low_threshold and sim < high_threshold:
+    elif sim >= sim_low and sim < sim_high:
         return 'median'
     else:
         return 'low'
 
 def create_flag_list():
-    # Path to the directory containing CSV files, relative to the location of algo.py
+    '''Create flag list by reading all flag files
+    return, csv_file_names: list
+    '''
+    # Path to the directory containing CSV files, relative to the location of rl_algo.py
     csv_pattern = os.path.join(sim_directory, '*.csv') 
     # List all CSV files
     csv_files = glob.glob(csv_pattern)
@@ -41,6 +75,14 @@ def create_flag_list():
     return csv_file_names
 
 def decide_flag(current_flag, action):
+    '''Decide flag by action given
+       Filter the familiarity level first, then similarity level next
+    input param
+        current_flag: string, current flag name
+        action: tuple, (familiarity level, similarity level)
+    return
+        flag_chosen: string, next flag name
+    '''
     (familiarity, similarity) = action
 
     # sort out (dis)similar flags
@@ -65,7 +107,11 @@ def decide_flag(current_flag, action):
 
     return flag_chosen
 
-def decide_engagement_level(engagement):
+def engagement_level(engagement):
+    '''Create categorical variable engagement_level by float variable engagement
+    input param, engagement: float
+    return, engagement_level: string
+    '''
     if engagement > egm_high:
         engagement_level = 'high'
     elif engagement > egm_low and engagement <= egm_high:
@@ -76,32 +122,22 @@ def decide_engagement_level(engagement):
     return engagement_level
 
 def run():
-    # Define the labels for the dimensions
-    # dimensions = ['Engagement', 'Familiarity', 'Similarity', 'Boring level']
-    # Possible values for each dimension
-    values = ['high', 'median', 'low']
-    integer_range = range(0, 21)
-    # Generate all possible combinations for the 4 dimensions
-    state_space = list(itertools.product(values, repeat=3))
-    state_space = [combination + (i,) for combination in state_space for i in integer_range] 
-    # [(engagement, familiarity, similarity, pages), ...]
-
-    # a_dimensions = ['Familiarity', 'Similarity']
-    a_values = ['high', 'median', 'low']
-    action_space = list(itertools.product(a_values, repeat=2))
-    # [(familiarity, similarity), ...]
+    '''Q-learning algorithm main function
+    input param:
+    return, reward_sum: float, total sum of rewards
+    '''
+    state_space, action_space, state_to_index, action_to_index, index_to_state, index_to_action = initialize()
     reward_sum = 0
-
-    rs = random.randint(0,len(state_space))
-    ra = random.randint(0,len(action_space))
+    totalsteps = 0
+    # rs = random.randint(0,len(state_space))
+    # ra = random.randint(0,len(action_space))
     num_episodes=4 # number of test users
     gamma=0.95
     learnRate=0.8
-    epsilon=0.8
-    min_explore=0.01
+    epsilon=1.0
 
     # initialization
-    Q=np.array([state_space[rs], action_space[ra]]) #Q(s,a). The Q-values from this array will be used to evaluate your policy.
+    Q=np.zeros([len(state_space), len(action_space)]) #Q(s_index,a_index). The Q-values from this array will be used to evaluate your policy.
     flags = create_flag_list()
 
     #each user session is one episode
@@ -110,20 +146,28 @@ def run():
         current_flag = random.choice(flags)
         pages = 0
         engagement = calculate_engagement(current_flag)
-        s = (decide_engagement_level(engagement), familiar(current_flag), random.choice(state_space)[2], pages)
+        # initial state with random flag's engagement, familiarity, and randomly chosed similarity, 0 page
+        s_content = (engagement_level(engagement), familiar(current_flag), random.choice(state_space)[2], pages)
+        s = state_to_index.get(s_content)
         done = False #not done
 
         while not done:
             if np.random.rand() < epsilon:
-                a = random.choice(action_space)
+                a_content = random.choice(action_space)
+                a = action_to_index.get(a_content)
             else:
                 a = np.argmax(Q[s, :])
-            print(a) # e.g. ('high', 'low')
-            next_flag = decide_flag(a)
+                a_content = index_to_action.get(a)
+
+            print(a, a_content) # e.g. ('high', 'low')
+            next_flag = decide_flag(a_content)
+
             r = calculate_engagement(next_flag)
             reward_sum += r
+            totalsteps += 1
             pages += 1
-            s1 = (decide_engagement_level(r), familiar(next_flag), similar(current_flag, next_flag), pages)
+            s1_content = (engagement_level(r), familiar(next_flag), similar(current_flag, next_flag), pages)
+            s1 = state_to_index.get(s1_content)
         
             Q[s, a] = (1 - learnRate) * Q[s, a] + learnRate * (r + gamma * np.max(Q[s1, :]))
 
@@ -134,9 +178,10 @@ def run():
                 break
 
             s=s1
+            s_content = s1_content
             current_flag = next_flag
+            epsilon = np.exp(-totalsteps / 35.0)
 
-            epsilon = max(epsilon*0.999, min_explore)
     return reward_sum
 
 if __name__ == "__main__":
