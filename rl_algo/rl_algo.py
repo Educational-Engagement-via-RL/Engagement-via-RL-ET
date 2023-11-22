@@ -74,7 +74,7 @@ def create_flag_list():
     # os.path.basename() extracts the file name from the full path.
     return csv_file_names
 
-def decide_flag(current_flag, action):
+def decide_flag(current_flag, action, flags):
     '''Decide flag by action given
        Filter the familiarity level first, then similarity level next
     input param
@@ -85,23 +85,20 @@ def decide_flag(current_flag, action):
     '''
     (familiarity, similarity) = action
 
+    # sort out (un)familiar flags
+    df_fam = pd.read_csv(fam_path)
+    df_fam = df_fam[df_fam['Image'].isin(flags)]
+    df_fam = df_fam[df_fam['Familiarity'] == familiarity]
+    familiar_flags = set(df_fam['Image'])
     # sort out (dis)similar flags
     sim_pattern = os.path.join(sim_directory, current_flag, '.csv')
     df_sim = pd.read_csv(sim_pattern)
-
-    similar_flags = set(df_sim['Image'].head(5))
-
-    # sort out (un)familiar flags
-    df_fam = pd.read_csv(fam_path)
-
-    df_fam = df_fam[df_fam['Familiarity'] == familiarity]
-    familiar_flags = set(df_fam['Image'])
 
     if similarity == 'high':
         flag_chosen = df_sim[df_sim['Image'].isin(familiar_flags)].sort_values(by=['Similarity']).iloc[0]['Image']
     elif similarity == 'median':
         df_sim_filter1 = df_sim[df_sim['Image'].isin(familiar_flags)].sort_values(by=['Similarity'])
-        flag_chosen = df_sim_filter1.iloc[int(len(df_sim_filter1)/2)]['Image']
+        flag_chosen = df_sim_filter1.iloc[int(len(df_sim_filter1)/2)+1]['Image']
     else:
         flag_chosen = df_sim[df_sim['Image'].isin(familiar_flags)].sort_values(by=['Similarity']).iloc[-1]['Image']
 
@@ -138,11 +135,11 @@ def run():
 
     # initialization
     Q=np.zeros([len(state_space), len(action_space)]) #Q(s_index,a_index). The Q-values from this array will be used to evaluate your policy.
-    flags = create_flag_list()
 
     #each user session is one episode
     for i in range(num_episodes):
         #reset the environment at the beginning of an episode
+        flags = create_flag_list()
         current_flag = random.choice(flags)
         pages = 0
         engagement = calculate_engagement(current_flag)
@@ -152,6 +149,7 @@ def run():
         done = False #not done
 
         while not done:
+            flags.pop(current_flag)
             if np.random.rand() < epsilon:
                 a_content = random.choice(action_space)
                 a = action_to_index.get(a_content)
