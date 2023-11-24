@@ -1,0 +1,167 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 90%;
+    max-width: 800px;
+    margin: 0 auto; 
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+.flags-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+.flag-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+    width: calc(20% - 15px);
+}
+
+.flag-item img {
+    max-width: 100px;
+    height: auto;
+    margin-bottom: 10px;
+}
+
+.flag-image {
+    width: 15vw;
+    max-width: 100%;
+    height: auto; 
+    margin-bottom: 5px; 
+}
+
+.content {
+    display: flex;
+    margin-top: 20px;
+    gap: 15px;
+}
+
+.flag {
+    flex: 1;
+    display: flex;
+    flex-direction: column;  /* Stack children vertically */
+    justify-content: start;  /* Align items to the top */
+    align-items: start;      /* Align items to the left */
+}
+
+.flag img {
+    width: 100%;            /* Making each image occupy the full width of .flag */
+    height: auto;           /* Maintaining the aspect ratio */
+    margin-bottom: 10px;    /* Add a gap between the images */
+}
+
+/* If you want to remove margin from the last image */
+.flag img:last-child {
+    margin-bottom: 0;
+}
+
+.info {
+    flex: 1;
+    padding: 10px 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.fixed-header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: white; /* Or any other color */
+    z-index: 1000;
+}
+
+#questions {
+    margin-bottom: 30px;
+}
+
+
+
+.question {
+    color: grey;
+}
+
+.question.active {
+    color: black;
+}
+
+
+#buttonsContainer {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+#submitButton {
+    display: none;
+}
+
+#confirmButton, #backButton, #submitButton {
+    padding: 10px 20px;
+    border: none;
+    background-color: #E5E5E5;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#confirmButton:hover, #backButton:hover {
+    background-color: #F5F5F5;
+}
+
+/* Importing Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+body {
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.6; /* Improved line-height for better readability */
+}
+
+.info p {
+    font-size: 14px;  /* Adjust based on preference */
+    color: #333;  /* Dark gray for softer color */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);  /* Subtle text shadow */
+    margin-bottom: 20px; /* Spacing between paragraphs */
+}
+
+/* Highlighted colors with emphasis */
+.color, .blue, .yellow, .red {
+    font-weight: bold; /* Bold font weight */
+    transform: scale(1.05); /* Scale up slightly for emphasis */
+}
+
+.color { color: rgb(90, 170, 107); }
+.blue { color: rgb(67, 129, 165); }
+.yellow { color: rgb(186, 160, 68); }
+.red { color: rgb(177, 64, 64); }
+
+/* If you want a subtle hover effect on the color spans */
+.color:hover, .blue:hover, .yellow:hover, .red:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* Center and resize the learning material image */
+.learning-material-image {
+    max-width: 100%; /* Adjust the percentage as needed */
+    display: block; /* Change the display to block */
+    margin: 20px auto; /* Add top and bottom margins and auto for left and right margins to center */
+}
+
+
+
+
+
+
+

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +11,7 @@
         .next-button {
             display: block;
             margin: 20px auto;
-            padding: 10px; /* Adjusted to narrow down */
+            padding: 10px;
             background-color: #E5E5E5;
             color: black;
             border: none;
@@ -21,41 +20,19 @@
             text-align: center;
             cursor: pointer;
             transition: background-color 0.3s;
-            width: fit-content; /* Added to make the button only as wide as the content */
+            width: fit-content;
         }
 
-        /* Added for the second image */
-        .flag img:nth-child(2) {
+        /* Adjusted to properly space the images */
+        .flag img {
             margin-top: 10px;
         }
     </style>
 </head>
-
 <body>
     <div class="container">
-        <h1>{{ country_name }}</h1>
-        <div class="content">
-            <div class="flag">
-                <img src="{{ flag.image }}" alt="{{ flag.name }}">
-                <img src="{{ url_for('static', filename='geo1.png') }}" alt="Geo Image">
-            </div>
-            
-            <div class="info">
-                <p>{{ flag_info }}</p>
-            </div>
-        </div>
+        <img src="{{ random_image_url }}" alt="Random Learning Material" class="learning-material-image">
         <a href="/congrats" class="next-button">Next</a>
     </div>
-    <script>
-        fetch('{{ url_for('static', filename='info.csv') }}').then(response => response.text()).then(data => {
-        let lines = data.split('\n');
-        let firstLine = lines[0].split('|');
-        document.querySelector('h1').textContent = firstLine[0].replace(/"/g, '');
-        let formattedText = firstLine[1].replace(/\\t/g, '</p><p>').replace(/"/g, '');  // Replacing \t with paragraph tags.
-        document.querySelector('.info').innerHTML = '<p>' + formattedText + '</p>'; // Using innerHTML to render the HTML tags within the text.
-    });
-
-    </script>
 </body>
-
 </html>

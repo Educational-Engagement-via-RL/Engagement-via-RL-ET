@@ -28,11 +28,11 @@
                 </div>
                 {% endfor %}
             </div>
-            <div id="errorMessage" style="color: red; display: none;">All flags should belong to one of the familiarity categories. Please select "Back" and review your ratings.</div>
+            <div id="errorMessage" style="color: red; display: none;">All flags should belong to one of the familiarity categories. Please select "Refresh" and review your ratings.</div>
             <div id="buttonsContainer">
                 <button type="button" id="confirmButton">Confirm</button>
                 <button type="button" onclick="prepareAndSubmitForm()" style="display: none;" id="submitButton">Submit Ratings</button>
-                <button type="button" id="backButton">Back</button>
+                <button type="button" id="backButton">Refresh</button>
             </div>
             
         </form>
@@ -48,43 +48,21 @@
         const selectedFlags = { 1: [], 2: [], 3: [] };
 
         document.querySelector('.question[data-question="1"]').classList.add('active');
-
-        backButton.addEventListener('click', function() {
-            errorMessage.style.display = 'none'; 
-
-            if (currentQuestion > 1) {
-                // Transition to the previous question
-                document.querySelector('.question[data-question="' + currentQuestion + '"]').textContent = document.querySelector('.question[data-question="' + currentQuestion + '"]').textContent.replace('➔', '');
-                currentQuestion--;
-                document.querySelector('.question[data-question="' + currentQuestion + '"]').textContent = '➔ ' + document.querySelector('.question[data-question="' + currentQuestion + '"]').textContent;
-                
-                let unveal = [];
-
-                // Enabling the checkboxes confirmed in the now current (after decrement) question
-                selectedFlags[currentQuestion].filter(flagId => !selectedFlags[currentQuestion - 1].includes(flagId)).forEach(flagId => {
-                    const checkbox = document.querySelector('input[name="rating_' + flagId + '"]');
-                    checkbox.disabled = false;
-                    checkbox.checked = true; // check the checkbox
-                });
-
-                if (currentQuestion === 2) {
-                    submitButton.style.display = 'none'; // Hide "Submit Ratings" button
-                    confirmButton.style.display = 'block'; // Show "Confirm" button
-
-                } 
-
-                // Reset the confirmedFlags and selectedFlags entries for the current question + 1
-                selectedFlags[currentQuestion + 1] = [];   // Notice the + 1
-
-                // Decrease the categorizedFlagsCount by the number of flags from the current question + 1
-                categorizedFlagsCount -= document.querySelectorAll('.flag-checkbox:checked').length;
-
-                
-
-                updateQuestionStyles();
-            } 
+        
+        window.addEventListener('scroll', function() {
+            var header = document.getElementById('questions'); // Replace with your header ID
+            var headerPosition = header.offsetTop; // Get the position of the header
+            
+            if (window.pageYOffset > headerPosition) {
+                header.classList.add('fixed-header');
+            } else {
+                header.classList.remove('fixed-header');
+            }
         });
 
+        backButton.addEventListener('click', function() {
+        window.location.reload();
+        });
 
         let categorizedFlagsCount = 0;
         confirmButton.addEventListener('click', function() {
@@ -121,7 +99,7 @@
                     confirmButton.style.display = 'none';
                     errorMessage.style.display = 'none';
                 } else {
-                    errorMessage.textContent = categorizedFlagsCount+'All flags should belong to one of the familiarity categories. Please select "Back" and review your ratings.';
+                    errorMessage.textContent = categorizedFlagsCount+'All flags should belong to one of the familiarity categories. Please select "Refresh" and review your ratings.';
                     errorMessage.style.display = 'block';
                 }
             }
