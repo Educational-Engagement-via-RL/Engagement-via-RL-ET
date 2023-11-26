@@ -132,7 +132,7 @@ def initialize_learning():
     Q = np.zeros([len(state_space), len(action_space)])
     flags = create_flag_list()
     current_flag = random.choice(flags)
-    engagement = determine_engagement(current_flag)  # Assuming you have this function
+    engagement = calculate_engagement(current_flag)  
     current_state = (engagement_level(engagement), familiar(current_flag), random.choice(state_space)[2], 0)
     total_steps = 0
 
