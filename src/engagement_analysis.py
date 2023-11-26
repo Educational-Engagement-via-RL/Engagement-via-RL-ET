@@ -26,32 +26,24 @@ AREA_COUNTRY_FLAG = (0, 0, UI_WIDTH // 2, UI_HEIGHT // 2)
 AREA_LOCATION = (UI_WIDTH // 2, 0, UI_WIDTH, UI_HEIGHT // 2)
 AREA_DETAILS_COLORS = (0, UI_HEIGHT // 2, UI_WIDTH, UI_HEIGHT)
 
-def parse_gaze_data(gaze_data_json):
+def parse_gaze_data(gaze_data_dic):
     """
-    Parse the JSON gaze data and convert it into a NumPy array.
+    Parse the gaze data dictionary and convert it into a NumPy array.
     """
-    """
-    modification needed, right now, the data is a list of dictionaries, in the form of
-    data_store = [
-    {"FPOGX": 0.3456, "FPOGY": 0.5678, "FPOGD": 0.1234, "FPOGID": 1, "LPUPILD": 2.3456, "RPUPILD": 2.4567},
-    {"FPOGX": 0.3460, "FPOGY": 0.5680, "FPOGD": 0.1200, "FPOGID": 2, "LPUPILD": 2.3500, "RPUPILD": 2.4600},
-    {"FPOGX": 0.3465, "FPOGY": 0.5685, "FPOGD": 0.1250, "FPOGID": 3, "LPUPILD": 2.3550, "RPUPILD": 2.4650},
-    {"FPOGX": 0.3470, "FPOGY": 0.5690, "FPOGD": 0.1300, "FPOGID": 4, "LPUPILD": 2.3600, "RPUPILD": 2.4700},
-    {"FPOGX": 0.3475, "FPOGY": 0.5695, "FPOGD": 0.1350, "FPOGID": 5, "LPUPILD": 2.3650, "RPUPILD": 2.4750},
-    ...
-    ]
-    But feel free to modify the data structure in the script GazepointAPI.py
-    """
-    # Parse the JSON data
-    data = json.loads(gaze_data_json)
+    # Initialize an empty list to store the fixation data
+    fixation_data_list = []
 
-    # Extract the relevant data and scale the X, Y coordinates to the screen dimensions
-    x = float(data['FPOGX']) * UI_WIDTH
-    y = float(data['FPOGY']) * UI_HEIGHT
-    fixation_duration = float(data['FPOGD'])
+    # Loop through each data point in the list
+    for data in gaze_data_dic:
+        x = float(data['FPOGX']) * UI_WIDTH
+        y = float(data['FPOGY']) * UI_HEIGHT
+        fixation_duration = float(data['FPOGD'])
 
-    # Create an array of the data
-    fixation_data = np.array([[x, y, fixation_duration]])
+        # Append the data as a new row in the fixation data list
+        fixation_data_list.append([x, y, fixation_duration])
+
+    # Convert the list to a NumPy array
+    fixation_data = np.array(fixation_data_list)
 
     return fixation_data
 
