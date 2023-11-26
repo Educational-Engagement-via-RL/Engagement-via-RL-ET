@@ -1,7 +1,6 @@
-######################################################################################
-# Connects to Gazepoint API server and feeds eye-tracking data to a shared queue
-# Created on 2023-10-29 by Zoe Zhou
-######################################################################################
+"""
+receving data from eye tracker
+"""
 
 import socket
 from threading import Thread
@@ -29,8 +28,8 @@ def data_collector():
     while True:
         data = s.recv(1024).decode().split(" ")
 
-        keys = ["FPOGX", "FPOGY", "FPOGD", "FPOGID", "LPUPILD", "RPUPILD"]
-        type_map = {"FPOGX": float, "FPOGY": float, "FPOGD": float, "FPOGID": int, "LPUPILD":float,"RPUPILD":float}
+        keys = ["FPOGX", "FPOGY", "FPOGD"]
+        type_map = {"FPOGX": float, "FPOGY": float, "FPOGD": float}
         result = {key: 0 for key in keys}
 
         for el in data:
@@ -39,7 +38,6 @@ def data_collector():
                     result[key] = type_map[key](el.split("\"")[1])
 
         data_queue.put(result)
-
 
 collector_thread = Thread(target=data_collector)
 collector_thread.start()

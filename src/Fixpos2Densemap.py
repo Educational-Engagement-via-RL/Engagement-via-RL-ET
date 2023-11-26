@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Jul 18 21:55:03 2018
-
-@author: user
+script for fixation heat map
 """
 
 import cv2

@@ -1,8 +1,24 @@
+"""
+script for evaluating engagement
+"""
+
 import numpy as np
 import json
-from main import Main  # Assuming this imports the main module for eye tracking
 from Fixpos2Densemap import Fixpos2Densemap, GaussianMask  # Import the required functions
 #from mock_eye_tracker import run as mock_run
+from GazepointAPI import data_queue
+import threading
+
+def continuous_data_reader():
+    while True:
+        data = data_queue.get()
+        print(data)
+        data_store.append(data)
+
+def start_data_reader():
+    thread = threading.Thread(target=continuous_data_reader)
+    thread.daemon = True  
+    thread.start()
 
 # Placeholder dimensions for the UI and areas of interest
 UI_WIDTH, UI_HEIGHT = 1021, 768
@@ -13,6 +29,18 @@ AREA_DETAILS_COLORS = (0, UI_HEIGHT // 2, UI_WIDTH, UI_HEIGHT)
 def parse_gaze_data(gaze_data_json):
     """
     Parse the JSON gaze data and convert it into a NumPy array.
+    """
+    """
+    modification needed, right now, the data is a list of dictionaries, in the form of
+    data_store = [
+    {"FPOGX": 0.3456, "FPOGY": 0.5678, "FPOGD": 0.1234, "FPOGID": 1, "LPUPILD": 2.3456, "RPUPILD": 2.4567},
+    {"FPOGX": 0.3460, "FPOGY": 0.5680, "FPOGD": 0.1200, "FPOGID": 2, "LPUPILD": 2.3500, "RPUPILD": 2.4600},
+    {"FPOGX": 0.3465, "FPOGY": 0.5685, "FPOGD": 0.1250, "FPOGID": 3, "LPUPILD": 2.3550, "RPUPILD": 2.4650},
+    {"FPOGX": 0.3470, "FPOGY": 0.5690, "FPOGD": 0.1300, "FPOGID": 4, "LPUPILD": 2.3600, "RPUPILD": 2.4700},
+    {"FPOGX": 0.3475, "FPOGY": 0.5695, "FPOGD": 0.1350, "FPOGID": 5, "LPUPILD": 2.3650, "RPUPILD": 2.4750},
+    ...
+    ]
+    But feel free to modify the data structure in the script GazepointAPI.py
     """
     # Parse the JSON data
     data = json.loads(gaze_data_json)
@@ -65,15 +93,16 @@ def calculate_engagement(fixation_data):
 
 if __name__ == "__main__":
     # Initialize the main application for eye tracking
-    main_app = Main()
+    # main_app = Main()
+    data_store = []
 
     # Assuming 'Main.run()' yields real-time JSON formatted gaze data
-    for gaze_data_json in main_app.run():
-        # Parse the real-time JSON formatted gaze data
-        fixation_data = parse_gaze_data(gaze_data_json)
+    # Parse the real-time JSON formatted gaze data
+    fixation_data = parse_gaze_data(data_store)
 
-        # Process the real-time fixation data to calculate engagement
-        real_time_engagement_score = calculate_engagement(fixation_data)
+    # Process the real-time fixation data to calculate engagement
+    real_time_engagement_score = calculate_engagement(fixation_data)
+    data_store.clear()
 
-        # Output the real-time engagement score
-        print(f"Real-time Engagement Score: {real_time_engagement_score}")
+    # Output the real-time engagement score
+    print(f"Real-time Engagement Score: {real_time_engagement_score}")

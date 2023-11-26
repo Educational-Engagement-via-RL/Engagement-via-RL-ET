@@ -1,0 +1,40 @@
+<!-- opening.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congratulations!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f2f2f2;
+        }
+        .container {
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Please select the class of this participant:</h1>
+        <form action="/submit_group" method="post"> <!-- Change the form action -->
+            <label for="groupSelect">Choose a group:</label>
+            <select id="groupSelect" name="group">
+                <option value="group1">Group 1</option>
+                <option value="group2">Group 2</option>
+            </select>
+            <input type="submit" value="Confirm">
+        </form>
+    </div>
+</body>
+</html>
