@@ -67,7 +67,7 @@ def submit_ratings():
 
     df = pd.DataFrame(familiarity_data, columns=['Flag Name', 'Familiarity Level'])
 
-    csv_path = os.path.join('path_to_save_csv', 'flag_familiarity.csv')
+    csv_path = os.path.join('path_to_save_csv', 'flag_familiarity.csv') # will modify this later
     df.to_csv(csv_path, index=False)
 
     return redirect(url_for('view_flag', flag_id=1))
