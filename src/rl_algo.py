@@ -4,6 +4,7 @@ import numpy as np
 import random
 import os
 import glob
+from engagement_analysis import determine_engagement, start_data_reader
 
 # similarity with scale -1 to 1
 sim_high = 0.3
@@ -118,69 +119,48 @@ def engagement_level(engagement):
 
     return engagement_level
 
-def run():
-    '''Q-learning algorithm main function
-    input param:
-    return, reward_sum: float, total sum of rewards
-    '''
+# Global variables to maintain state
+current_flag = None
+Q = None
+current_state = None
+total_steps = 0
+flags = None
+
+def initialize_learning():
+    global current_flag, Q, current_state, total_steps, flags
     state_space, action_space, state_to_index, action_to_index, index_to_state, index_to_action = initialize()
-    reward_sum = 0
-    totalsteps = 0
-    # rs = random.randint(0,len(state_space))
-    # ra = random.randint(0,len(action_space))
-    num_episodes=4 # number of test users
-    gamma=0.95
-    learnRate=0.8
-    epsilon=1.0
+    Q = np.zeros([len(state_space), len(action_space)])
+    flags = create_flag_list()
+    current_flag = random.choice(flags)
+    engagement = determine_engagement(current_flag)  # Assuming you have this function
+    current_state = (engagement_level(engagement), familiar(current_flag), random.choice(state_space)[2], 0)
+    total_steps = 0
 
-    # initialization
-    Q=np.zeros([len(state_space), len(action_space)]) #Q(s_index,a_index). The Q-values from this array will be used to evaluate your policy.
+def run_one_step():
+    global current_flag, Q, current_state, total_steps, flags
+    state_space, action_space, state_to_index, action_to_index, index_to_state, index_to_action = initialize()
+    gamma = 0.95
+    learnRate = 0.8
+    epsilon = np.exp(-total_steps / 35.0)
 
-    #each user session is one episode
-    for i in range(num_episodes):
-        #reset the environment at the beginning of an episode
-        flags = create_flag_list()
-        current_flag = random.choice(flags)
-        pages = 0
-        engagement = calculate_engagement(current_flag)
-        # initial state with random flag's engagement, familiarity, and randomly chosed similarity, 0 page
-        s_content = (engagement_level(engagement), familiar(current_flag), random.choice(state_space)[2], pages)
-        s = state_to_index.get(s_content)
-        done = False #not done
+    s = state_to_index.get(current_state)
+    if np.random.rand() < epsilon:
+        a_content = random.choice(action_space)
+        a = action_to_index.get(a_content)
+    else:
+        a = np.argmax(Q[s, :])
+        a_content = index_to_action.get(a)
 
-        while not done:
-            flags.pop(current_flag)
-            if np.random.rand() < epsilon:
-                a_content = random.choice(action_space)
-                a = action_to_index.get(a_content)
-            else:
-                a = np.argmax(Q[s, :])
-                a_content = index_to_action.get(a)
+    next_flag = decide_flag(current_flag, a_content, flags)
+    r = determine_engagement(next_flag)
+    s1_content = (engagement_level(r), familiar(next_flag), similar(current_flag, next_flag), total_steps + 1)
+    s1 = state_to_index.get(s1_content)
 
-            print(a, a_content) # e.g. ('high', 'low')
-            next_flag = decide_flag(a_content)
+    Q[s, a] = (1 - learnRate) * Q[s, a] + learnRate * (r + gamma * np.max(Q[s1, :]))
 
-            r = calculate_engagement(next_flag)
-            reward_sum += r
-            totalsteps += 1
-            pages += 1
-            s1_content = (engagement_level(r), familiar(next_flag), similar(current_flag, next_flag), pages)
-            s1 = state_to_index.get(s1_content)
-        
-            Q[s, a] = (1 - learnRate) * Q[s, a] + learnRate * (r + gamma * np.max(Q[s1, :]))
+    current_flag = next_flag
+    current_state = s1_content
+    total_steps += 1
 
-            #break if done, reached terminal state
-            if pages == 20:
-                done = True
-            if done:
-                break
+    return next_flag
 
-            s=s1
-            s_content = s1_content
-            current_flag = next_flag
-            epsilon = np.exp(-totalsteps / 35.0)
-
-    return reward_sum
-
-if __name__ == "__main__":
-    run()

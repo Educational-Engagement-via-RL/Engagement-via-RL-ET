@@ -1,4 +1,4 @@
-<!-- congrats.html -->
+<!-- opening.html -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -26,9 +26,15 @@
 </head>
 <body>
     <div class="container">
-        <h1>Congratulations!</h1>
-        <p>You've successfully completed the test.</p>
-        <a href="/">Back to Home</a>
+        <h1>Please select the class of this participant:</h1>
+        <form action="/submit_group" method="post"> <!-- Change the form action -->
+            <label for="groupSelect">Choose a group:</label>
+            <select id="groupSelect" name="group">
+                <option value="group1">Group 1</option>
+                <option value="group2">Group 2</option>
+            </select>
+            <input type="submit" value="Confirm">
+        </form>
     </div>
 </body>
 </html>

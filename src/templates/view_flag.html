@@ -32,7 +32,8 @@
 <body>
     <div class="container">
         <img src="{{ random_image_url }}" alt="Random Learning Material" class="learning-material-image">
-        <a href="/congrats" class="next-button">Next</a>
+        <!-- Update the link to dynamically generate the next image -->
+        <a href="{{ url_for('view_flag') }}" class="next-button">Next</a>
     </div>
 </body>
 </html>
