@@ -129,15 +129,14 @@ def engagement_level(engagement):
 
 # Global variables to maintain state
 current_flag = None
-Q = None
+state_space, action_space = initialize()
+Q = np.zeros([len(state_space), len(action_space)])
 current_state = None
 total_steps = 0
 flags = None
 
 def initialize_learning():
     global current_flag, Q, current_state, total_steps, flags
-    state_space, action_space = initialize()
-    Q = np.zeros([len(state_space), len(action_space)])
     flags = create_flag_list()
     current_flag = random.choice(flags)
     intr_norm = df_intr[df_intr['Code'] == current_flag]["Score"]

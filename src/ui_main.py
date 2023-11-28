@@ -65,11 +65,11 @@ def submit_ratings():
 
     familiarity_data = []
     for flag_id in unfamiliar_flags:
-        familiarity_data.append([flag_id_to_name[flag_id], 3])
+        familiarity_data.append([flag_id_to_name[flag_id], "low"])
     for flag_id in not_sure_flags:
-        familiarity_data.append([flag_id_to_name[flag_id], 2])
+        familiarity_data.append([flag_id_to_name[flag_id], "median"])
     for flag_id in familiar_flags:
-        familiarity_data.append([flag_id_to_name[flag_id], 1])
+        familiarity_data.append([flag_id_to_name[flag_id], "high"])
 
     df = pd.DataFrame(familiarity_data, columns=['Flag Name', 'Familiarity Level'])
 
@@ -108,7 +108,7 @@ def view_flag():
     """
     session['flag_count'] = session.get('flag_count', 0) + 1
 
-    if session.get('selected_group') == 'group1':
+    if session.get('selected_group') == 'group1': #control group
         image_url = random_image()[0]
         current_flag = random_image()[1]
         intr_norm = df_intr[df_intr['Code'] == current_flag]["Score"]
@@ -116,7 +116,7 @@ def view_flag():
         print('engagement score:', engagement_score)
         scores_record_random.append(engagement_score)
     else:
-        image_name = run_one_step()  
+        image_name = run_one_step()  #test group
         image_url = url_for('static', filename=os.path.join('learningMaterial', image_name))
 
     return render_template('view_flag.html', flag_image_url=image_url)
