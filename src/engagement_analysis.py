@@ -72,17 +72,18 @@ def get_current_engagement_score():
         return None  # Return None or some default value if no data is available
 
     fixation_data = parse_gaze_data(data_store)
-    
+
     # Filter the fixation data to exclude dictionaries where both FPOGX and FPOGY are zeros
     nonzero_data = [data_point for data_point in fixation_data if data_point['FPOGX'] != 0 or data_point['FPOGY'] != 0]
 
     if len(nonzero_data) > 0:
         # At least one dictionary has nonzero FPOGX or FPOGY
         real_time_engagement_score = calculate_engagement(nonzero_data, UI_WIDTH, UI_HEIGHT)
+        log_engagement_score = np.log10(real_time_engagement_score)
     else:
-        real_time_engagement_score = None  # Set to None if both FPOGX and FPOGY are zeros in all dictionaries
+        log_engagement_score = None  # Set to None if both FPOGX and FPOGY are zeros in all dictionaries
 
 
     data_store.clear()
 
-    return real_time_engagement_score
+    return log_engagement_score
