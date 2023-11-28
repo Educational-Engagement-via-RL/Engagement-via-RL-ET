@@ -41,32 +41,6 @@ def initialize():
 
     return state_space, action_space, state_to_index, action_to_index, index_to_state, index_to_action
 
-def familiar(flag):
-    '''Read familiarity table and return familiarity level
-    input param, flag: string, national flag file name
-    return, familiarity level: string
-    '''
-    df_fam =pd.read_csv(fam_path)
-    return df_fam.loc[flag, 'Familiarity']
-
-def similar(current_flag, next_flag):
-    '''Read similarity table and return similarity level
-    input param
-        current_flag: string, current national flag file name
-        next_flag: string, next national flag file name\
-    return, similarity level: string, categorical created by if-else statement
-    '''
-    csv_path = os.path.join(sim_directory, current_flag, '.csv')
-    df_sim = pd.read_csv(csv_path)
-    sim = df_sim.loc[next_flag, 'Similarity']
-
-    if sim >= sim_high:
-        return 'high'
-    elif sim >= sim_low and sim < sim_high:
-        return 'median'
-    else:
-        return 'low'
-
 def create_flag_list():
     '''Create flag list by reading all flag files
     return, csv_file_names: list
@@ -80,6 +54,37 @@ def create_flag_list():
     # os.path.splitext() is used to split the file name into a name and extension tuple.
     # os.path.basename() extracts the file name from the full path.
     return csv_file_names
+
+total_steps = 0
+flags = create_flag_list()
+state_space, action_space, state_to_index, action_to_index, index_to_state, index_to_action = initialize()
+Q = np.zeros([len(state_space), len(action_space)])
+
+def familiar(flag):
+    '''Read familiarity table and return familiarity level
+    input param, flag: string, national flag file name
+    return, familiarity level: string
+    '''
+    df_fam =pd.read_csv(fam_path)
+    return df_fam.loc[flag, 'Familiarity']
+
+def similar(current_flag, next_flag):
+    '''Read similarity table and return similarity level
+    input param
+        current_flag: string, current national flag file name
+        next_flag: string, next national flag file name
+    return, similarity level: string, categorical created by if-else statement
+    '''
+    csv_path = os.path.join(sim_directory, current_flag, '.csv')
+    df_sim = pd.read_csv(csv_path)
+    sim = df_sim.loc[next_flag, 'Similarity']
+
+    if sim >= sim_high:
+        return 'high'
+    elif sim >= sim_low and sim < sim_high:
+        return 'median'
+    else:
+        return 'low'
 
 def decide_flag(current_flag, action, flags):
     '''Decide flag by action given
@@ -128,16 +133,11 @@ def engagement_level(engagement):
     return engagement_level
 
 # Global variables to maintain state
-current_flag = None
-state_space, action_space = initialize()
-Q = np.zeros([len(state_space), len(action_space)])
-current_state = None
-total_steps = 0
-flags = None
+# current_flag = None
+# current_state = None
 
 def initialize_learning():
-    global current_flag, Q, current_state, total_steps, flags
-    flags = create_flag_list()
+    global Q, current_state, total_steps, flags
     current_flag = random.choice(flags)
     intr_norm = df_intr[df_intr['Code'] == current_flag]["Score"]
     engagement = get_current_engagement_score(current_flag) - intr_norm
@@ -146,7 +146,7 @@ def initialize_learning():
 
 def run_one_step():
     global current_flag, Q, current_state, total_steps, flags
-    action_space, state_to_index, action_to_index, index_to_action = initialize()
+    
     gamma = 0.95
     learnRate = 0.8
     epsilon = np.exp(-total_steps / 35.0)
