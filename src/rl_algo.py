@@ -4,7 +4,7 @@ import numpy as np
 import random
 import os
 import glob
-from engagement_analysis import determine_engagement, start_data_reader
+from engagement_analysis import get_current_engagement_score
 
 # similarity with scale -1 to 1
 sim_high = 0.3
@@ -12,8 +12,14 @@ sim_low = -0.7
 # engagement with scale 0 to 1
 egm_high = 0.65
 egm_low = 0.35
-sim_directory = os.path.join(os.path.dirname(__file__), '..', 'data/SimilarityCsv') # __file__ represents the current file path
-fam_path = os.path.join(os.path.dirname(__file__), '..', 'data/familiarity.csv')
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(script_dir)
+sim_directory = os.path.join(parent_dir, 'data/similarity') 
+fam_path = os.path.join(parent_dir, 'data/familiarity.csv')
+intr_path = os.path.join(parent_dir, 'data/intrinsic_scores.csv') 
+df_intr = pd.read_csv(intr_path)
+scores_record = []
 
 def initialize():
     ''' Create state space with dimensions = ['Engagement', 'Familiarity', 'Similarity', 'Boring level']
@@ -110,6 +116,8 @@ def engagement_level(engagement):
     input param, engagement: float
     return, engagement_level: string
     '''
+    print('engagement score:', engagement)
+    scores_record.append(engagement)
     if engagement > egm_high:
         engagement_level = 'high'
     elif engagement > egm_low and engagement <= egm_high:
@@ -128,17 +136,18 @@ flags = None
 
 def initialize_learning():
     global current_flag, Q, current_state, total_steps, flags
-    state_space, action_space, state_to_index, action_to_index, index_to_state, index_to_action = initialize()
+    state_space, action_space = initialize()
     Q = np.zeros([len(state_space), len(action_space)])
     flags = create_flag_list()
     current_flag = random.choice(flags)
-    engagement = calculate_engagement(current_flag)  
+    intr_norm = df_intr[df_intr['Code'] == current_flag]["Score"]
+    engagement = get_current_engagement_score(current_flag) - intr_norm
     current_state = (engagement_level(engagement), familiar(current_flag), random.choice(state_space)[2], 0)
     total_steps = 0
 
 def run_one_step():
     global current_flag, Q, current_state, total_steps, flags
-    state_space, action_space, state_to_index, action_to_index, index_to_state, index_to_action = initialize()
+    action_space, state_to_index, action_to_index, index_to_action = initialize()
     gamma = 0.95
     learnRate = 0.8
     epsilon = np.exp(-total_steps / 35.0)
@@ -152,7 +161,7 @@ def run_one_step():
         a_content = index_to_action.get(a)
 
     next_flag = decide_flag(current_flag, a_content, flags)
-    r = determine_engagement(next_flag)
+    r = get_current_engagement_score(next_flag)
     s1_content = (engagement_level(r), familiar(next_flag), similar(current_flag, next_flag), total_steps + 1)
     s1 = state_to_index.get(s1_content)
 

@@ -9,18 +9,21 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import pandas as pd
 
 from rl_algo import initialize_learning, run_one_step
+from engagement_analysis import get_current_engagement_score
 
 app = Flask(__name__)
 app.secret_key = "secret_key"
 
-script_dir = os.path.dirname(os.path.abspath(__file__)) # absolute path
-rating_dir = os.path.join(script_dir, 'static', 'rating') # path to 'static/rating'
+script_dir = os.path.dirname(os.path.abspath(__file__)) 
+rating_dir = os.path.join(script_dir, 'static', 'rating') 
 
-# listing files under 'static/rating' 
-flags = [{"id": idx + 1, "name": f"Country{idx + 1}", 
+flags = [{"id": idx + 1, 
+          "name": os.path.splitext(filename)[0],  
           "image": os.path.join('/static/rating', filename), 
           "info": f"Info about Country{idx + 1}"} 
          for idx, filename in enumerate(os.listdir(rating_dir))]
+
+scores_record_random = []
 
 @app.route('/')
 def index():
@@ -43,8 +46,8 @@ def rate_flags():
     """
     rating familarity level
     """
-    group = session.get('selected_group', 'default') # Retrieve the selected group
-    return render_template('rate_flags.html', group=group)
+    group = session.get('selected_group', 'default') 
+    return render_template('rate_flags.html', group=group, flags=flags)
 
 @app.route('/submit_ratings', methods=['POST'])
 def submit_ratings():
@@ -67,7 +70,8 @@ def submit_ratings():
 
     df = pd.DataFrame(familiarity_data, columns=['Flag Name', 'Familiarity Level'])
 
-    csv_path = os.path.join('path_to_save_csv', 'flag_familiarity.csv') # will modify this later
+    parent_dir = os.path.dirname(script_dir)
+    csv_path = os.path.join(parent_dir, 'data', 'flag_familiarity.csv')
     df.to_csv(csv_path, index=False)
 
     return redirect(url_for('view_flag', flag_id=1))
@@ -77,9 +81,11 @@ def random_image():
     """
     control group
     """
-    images = os.listdir('static/learningMaterial')  # List all files in the directory
-    random_image = random.choice(images)  # Randomly select an image
-    return url_for('static', filename=f'learningMaterial/{random_image}')
+    images_dir = os.path.join(app.static_folder, 'learningMaterial') 
+    images = os.listdir(images_dir)  # List all files in the directory
+    random_image = random.choice(images)  
+    image_path = os.path.join('learningMaterial', random_image)  
+    return url_for('static', filename=image_path)
 
 @app.route('/start_learning')
 def start_learning():
@@ -95,15 +101,18 @@ def view_flag():
     viewing learning material
     """
     session['flag_count'] = session.get('flag_count', 0) + 1
-    if session['flag_count'] > 20:
-        return redirect(url_for('congrats'))
 
     if session.get('selected_group') == 'group1':
-        next_flag = random_image()
+        image_url = random_image()
+        engagement_score = get_current_engagement_score()
+        print('engagement score:', engagement_score)
+        scores_record_random.append(engagement_score)
     else:
-        next_flag = run_one_step()
+        image_name = run_one_step()  
+        image_url = url_for('static', filename=os.path.join('learningMaterial', image_name))
 
-    return render_template('view_flag.html', flag=next_flag)
+    return render_template('view_flag.html', flag_image_url=image_url)
+
 
 @app.route('/congrats')
 def congrats():

@@ -3,9 +3,7 @@ script for evaluating engagement
 """
 
 import numpy as np
-import json
-from Fixpos2Densemap import Fixpos2Densemap, GaussianMask  # Import the required functions
-#from mock_eye_tracker import run as mock_run
+from Fixpos2Densemap import Fixpos2Densemap
 from GazepointAPI import data_queue
 import threading
 
@@ -83,18 +81,19 @@ def calculate_engagement(fixation_data):
     aggregate_engagement = (engagement_country_flag + engagement_location + engagement_details_colors) / 3
     return aggregate_engagement
 
-if __name__ == "__main__":
-    # Initialize the main application for eye tracking
-    # main_app = Main()
-    data_store = []
+def get_current_engagement_score():
+    """
+    Calculate and return the current engagement score based on the latest fixation data.
+    """
+    global data_store
+    if 'data_store' not in globals():
+        data_store = []
 
-    # Assuming 'Main.run()' yields real-time JSON formatted gaze data
-    # Parse the real-time JSON formatted gaze data
+    if not data_store:
+        return None  # Return None or some default value if no data is available
+
     fixation_data = parse_gaze_data(data_store)
-
-    # Process the real-time fixation data to calculate engagement
     real_time_engagement_score = calculate_engagement(fixation_data)
     data_store.clear()
 
-    # Output the real-time engagement score
-    print(f"Real-time Engagement Score: {real_time_engagement_score}")
+    return real_time_engagement_score
