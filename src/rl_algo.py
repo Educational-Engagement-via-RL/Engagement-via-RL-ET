@@ -161,7 +161,7 @@ def run_one_step():
         a_content = index_to_action.get(a)
 
     next_flag = decide_flag(current_flag, a_content, flags)
-    r = get_current_engagement_score(next_flag)
+    r = get_current_engagement_score()
     s1_content = (engagement_level(r), familiar(next_flag), similar(current_flag, next_flag), total_steps + 1)
     s1 = state_to_index.get(s1_content)
 

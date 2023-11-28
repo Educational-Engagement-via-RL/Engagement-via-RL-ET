@@ -42,7 +42,10 @@ def Fixpos2Densemap(fix_arr, width, height, imgfile, alpha=0.5, threshold=10):
     threshold : heatmap threshold(0~255)
     return heatmap 
     """
-    
+
+    H = height
+    W = width
+
     heatmap = np.zeros((H,W), np.float32)
     for n_subject in tqdm(range(fix_arr.shape[0])):
         heatmap += GaussianMask(W, H, 33, (fix_arr[n_subject,0],fix_arr[n_subject,1]),
@@ -53,7 +56,7 @@ def Fixpos2Densemap(fix_arr, width, height, imgfile, alpha=0.5, threshold=10):
     heatmap = heatmap*255
     heatmap = heatmap.astype("uint8")
     
-    if imgfile.any():
+    if imgfile:
         # Resize heatmap to imgfile shape 
         h, w, _ = imgfile.shape
         heatmap = cv2.resize(heatmap, (w, h))

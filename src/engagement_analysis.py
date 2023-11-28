@@ -7,10 +7,13 @@ from Fixpos2Densemap import Fixpos2Densemap
 from GazepointAPI import data_queue
 import threading
 
+data_store = []
+
 def continuous_data_reader():
+    global data_store 
     while True:
         data = data_queue.get()
-        print(data)
+        # print(data)
         data_store.append(data)
 
 def start_data_reader():
@@ -36,7 +39,6 @@ def parse_gaze_data(gaze_data_dic):
         x = float(data['FPOGX']) * UI_WIDTH
         y = float(data['FPOGY']) * UI_HEIGHT
         fixation_duration = float(data['FPOGD'])
-
         # Append the data as a new row in the fixation data list
         fixation_data_list.append([x, y, fixation_duration])
 
@@ -85,9 +87,6 @@ def get_current_engagement_score():
     """
     Calculate and return the current engagement score based on the latest fixation data.
     """
-    global data_store
-    if 'data_store' not in globals():
-        data_store = []
 
     if not data_store:
         return None  # Return None or some default value if no data is available

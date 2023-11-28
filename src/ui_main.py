@@ -9,13 +9,16 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import pandas as pd
 
 from rl_algo import initialize_learning, run_one_step
-from engagement_analysis import get_current_engagement_score
+from engagement_analysis import get_current_engagement_score, start_data_reader
 
 app = Flask(__name__)
 app.secret_key = "secret_key"
 
 script_dir = os.path.dirname(os.path.abspath(__file__)) 
-rating_dir = os.path.join(script_dir, 'static', 'rating') 
+rating_dir = os.path.join(script_dir, 'static', 'rating')
+parent_dir = os.path.dirname(script_dir)
+intr_path = os.path.join(parent_dir, 'data/intrinsic_scores.csv') 
+df_intr = pd.read_csv(intr_path)
 
 flags = [{"id": idx + 1, 
           "name": os.path.splitext(filename)[0],  
@@ -74,6 +77,8 @@ def submit_ratings():
     csv_path = os.path.join(parent_dir, 'data', 'flag_familiarity.csv')
     df.to_csv(csv_path, index=False)
 
+    start_data_reader()
+
     return redirect(url_for('view_flag', flag_id=1))
 
 @app.route('/random_image')
@@ -82,10 +87,11 @@ def random_image():
     control group
     """
     images_dir = os.path.join(app.static_folder, 'learningMaterial') 
-    images = os.listdir(images_dir)  # List all files in the directory
+    images = os.listdir(images_dir) 
     random_image = random.choice(images)  
-    image_path = os.path.join('learningMaterial', random_image)  
-    return url_for('static', filename=image_path)
+    image_path = 'learningMaterial/' + random_image 
+    return [url_for('static', filename=image_path), random_image]
+
 
 @app.route('/start_learning')
 def start_learning():
@@ -103,8 +109,10 @@ def view_flag():
     session['flag_count'] = session.get('flag_count', 0) + 1
 
     if session.get('selected_group') == 'group1':
-        image_url = random_image()
-        engagement_score = get_current_engagement_score()
+        image_url = random_image()[0]
+        current_flag = random_image()[1]
+        intr_norm = df_intr[df_intr['Code'] == current_flag]["Score"]
+        engagement_score = get_current_engagement_score() - intr_norm
         print('engagement score:', engagement_score)
         scores_record_random.append(engagement_score)
     else:
