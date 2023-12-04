@@ -34,7 +34,8 @@
 
         <img src="{{ flag_image_url }}" alt="Flag Image" class="learning-material-image">
         
-        <a href="{{ url_for('view_flag') }}" class="next-button">Next</a>
+        <a href="{{ url_for('view_flag', page_num=page_num) }}" class="next-button">Next</a>
+
     </div>
 </body>
 </html>
