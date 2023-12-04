@@ -7,12 +7,10 @@ import glob
 from engagement_analysis import get_current_engagement_score
 import pickle
 
-# similarity with scale -1 to 1
 sim_low = -0.13 # X value for the first line (1/3 of total): -0.13180964986483257
 sim_high = 0.10 # X value for the second line (2/3 of total): 0.10018077492713928
 
-# engagement with scale 0 to 1
-egm_high = 3
+egm_high = 2
 egm_low = 1
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -207,9 +205,9 @@ def run_one_step():
         a_content = index_to_action.get(a)
 
     next_flag = decide_flag(current_flag, a_content, flags)
-    # comment for debugging purposes - intr
-    # r = get_current_engagement_score()
-    r = 1 # for debugging
+    intr_norm = df_intr[df_intr['Code'] == current_flag.replace(".jpg","")]["Score"]
+    engagement_score_ori = get_current_engagement_score() 
+    r = float(engagement_score_ori - intr_norm)
     s1_content = (engagement_level(r), familiar(next_flag), similar(current_flag, next_flag))
     s1 = state_to_index.get(s1_content)
 

@@ -128,12 +128,11 @@ def view_flag():
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         file_path = os.path.join(output_dir, 'cumulative_scores.csv')
-
-        # Determine group number based on selected_group
-        group_number = 1 if selected_group == 'group1' else 2
+        group_number = "control" if selected_group == 'group1' else "test"
         append_scores_to_csv(group_number, scores_record_random, file_path)
         
         scores_record_random = []  # Reset scores for the next turn
+        
         return redirect(url_for('congrats'))
 
     elif selected_group == 'group1':  # control group
@@ -141,8 +140,8 @@ def view_flag():
         print(df_intr, current_flag.replace(".jpg",""))
         intr_norm = df_intr[df_intr['Code'] == current_flag.replace(".jpg","")]["Score"]
         engagement_score_ori = get_current_engagement_score() 
-        engagement_score = engagement_score_ori - intr_norm
-        print("engagement score: ", intr_norm, engagement_score_ori, engagement_score)
+        engagement_score = float(engagement_score_ori - intr_norm)
+        print("engagement score: ",engagement_score, type(engagement_score))
         scores_record_random.append(engagement_score)
     else:
         # q_table = load_q_table()
@@ -159,6 +158,8 @@ def congrats():
     """
     final page
     """
+    # Determine group number based on selected_group
+       
     return render_template('congrats.html')
 
 if __name__ == '__main__':
