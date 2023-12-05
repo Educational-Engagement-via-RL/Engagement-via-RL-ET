@@ -21,7 +21,7 @@ At the core of most RL techniques and directions mentioned above is the evaluati
 
 It's crucial to recognize that, while this project primarily emphasizes engagement without delving deep into other key educational outcomes, such as content retention or subjective learning experiences, engagement is indeed one of the most crucial metrics in learning, and is positively correlated to students' performance under other metrics. Students deeply engaged in their learning are not only more efficient at content assimilation but also nurture a sustained passion for education. This intrinsic connection to learning positively impacts a spectrum of academic metrics, from retention rates to grasping intricate topics, culminating in heightened overall satisfaction. Thus, by channeling our efforts into maximizing student engagement, we envision crafting a richer, more immersive educational milieu.
 
-Zooming into the specifics of our initiative, we've curated learning materials pivoting around national flags. Given that participants may come from diverse cultural backgrounds, their interest and pre-knowledge in different flags, along with their learning preferences might vary, leading to differing optimal learning policies. Through interaction, the system proposed by this project aims to adapt to each student's learning preference, enhancing their ability engagement in the learning material.
+Zooming into the specifics of our initiative, we've curated learning materials pivoting around national flags. Given that participants may come from diverse cultural backgrounds, their interest and pre-knowledge in different flags, along with their learning preferences might vary, leading to differing optimal learning policies. Through interaction, the system proposed by this project aims to adapt to each student's learning preference, enhancing their ability to engage in the learning material.
 
 In the subsequent proposal, we will detail the definitions of certain measurements and how we evaluate them, outline the preliminary RL model, and describe the application's workflow.
 
@@ -33,7 +33,7 @@ Regardless of the specific impact that a student's familiarity with learning mat
 
 Besides the levels of similarity and familiarity, students' engagement level is another measurement to be considered and is at the core of this application, as the goal of the algorithm is to maximize students' engagement. Below, we illustrate in detail the evaluation of familiarity, similarity, and student engagement in this project.
 
-### Familarity Level
+### Familiarity Level
 Students' initial familiarity level with each national flag is based on self-reporting. In the knowledge profiling stage of the experiment, students will be presented with pictures of all the national flags. For each of these flags, students will be asked to rate their familiarity with the flags on a scale from 1 to 3. For more details, please refer to the section 'System Workflow for an Individual User'.
 
 ### Similarity Level
