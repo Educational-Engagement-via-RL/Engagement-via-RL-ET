@@ -8,6 +8,7 @@
 4. [System Workflow for an Individual User](#workflow)
 5. [Algorithm](#algorithm)
 6. [Result](#result)
+7. [Future Improvements](#future_improvements)
 
 ## 1. Introduction <a name="introduction"></a>
 
