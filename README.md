@@ -106,12 +106,19 @@ For the learning algorithm, we will implement Q-learning, a model-free, off-poli
 
 ## Appendix A: References <a name="references"></a>
 [1] Mon, F., Bisni, K., Wasfi, A., Hayajneh, M., Slim, A., & Abu Ali, N. (2023). Reinforcement Learning in Education: A Literature Review. Informatics, 10(3), 74.
+
 [2] Pattemore, M., & Gilabert, R. (2023). Using eye-tracking to measure cognitive engagement with feedback in a digital literacy game. The Language Learning Journal, 51(4), 472-490.
+
 [3] Singla, A. (2021). Reinforcement Learning for Education: Opportunities and Challenges. arXiv preprint arXiv:2107.08828v1.Retrieved from arXiv.
+
 [4] Ding, K., Ma, K., & Wang, S. (2019). Intrinsic Image Popularity Assessment. In Proceedings of the 27th ACM International Conference on Multimedia.
+
 [5] Bartlett, F. C. (1995). Remembering. Cambridge University Press. (Original work published 1932).
-[6] Radianti, J., Majchrzak, T. A., Fromm, J., & Wohlgenannt, I. (2022). Eye-Tracking in Immersive Virtual Reality for Education: A Review of the Current Progress and Applications. Frontiers in Education, 7, 697032.
-[7] Chi, M., VanLehn, K., Litman, D., & Jordan, P. (2011). An evaluation of pedagogical tutorial tactics for a natural language tutoring system: A reinforcement learning approach. International Journal of Artificial Intelligence in Education, 21, 83–113.DOI
+
+[6] Radianti, J., Majchrzak, T. A., Fromm, J., & Wohlgenannt, I. (2022). Eye-Tracking in Immersive Virtual Reality for Education: A Review of the Current Progress and Applications. Frontiers in Education, 7, 697032.、
+
+[7] Chi, M., VanLehn, K., Litman, D., & Jordan, P. (2011). An evaluation of pedagogical tutorial tactics for a natural language tutoring system: A reinforcement learning approach. International Journal of Artificial Intelligence in Education, 21, 83–113.
+
 [8] Borys, M., & Plechawska-Wójcik, M. (2017). Eye-tracking metrics in perception and visual attention research. EJMT, 3, 11-23.
 
 ## Appendix B: UI <a name="UI"></a>
